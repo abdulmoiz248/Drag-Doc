@@ -3,11 +3,12 @@ import time
 import google.generativeai as genai
 from dotenv import load_dotenv
 from tenacity import retry, wait_random_exponential, stop_after_attempt, retry_if_exception_type
+from utils.local_summarizer import localSummary
 
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
-modelName = "gemini-1.5-flash"
+modelName = "gemini-2.0-flash"
 
 @retry(wait=wait_random_exponential(min=10, max=60), stop=stop_after_attempt(4), retry=retry_if_exception_type(Exception))
 def generateWithGemini(context, question):
@@ -35,7 +36,7 @@ def createSummary(db):
         question = "Give a concise and clear summary of this file."
 
         try:
-            summary = generateWithGemini(context, question)
+            summary = localSummary(context)
             summaries[filename] = summary
             print(f"📄 Summary for {filename}:\n{summary}\n{'-'*60}")
             time.sleep(5)
